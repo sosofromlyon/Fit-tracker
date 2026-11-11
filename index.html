@@ -1,21 +1,436 @@
-{
-  "short_name": "FitTracker",
-  "name": "FitTracker RPG - Musculation & Progression",
-  "icons": [
-    {
-      "src": "icon-192.png",
-      "type": "image/png",
-      "sizes": "192x192"
-    },
-    {
-      "src": "icon-512.png",
-      "type": "image/png",
-      "sizes": "512x512"
-    }
-  ],
-  "start_url": "./index.html",
-  "background_color": "#0d1117",
-  "theme_color": "#0d1117",
-  "display": "standalone",
-  "orientation": "portrait"
-}
+{<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FitTracker RPG - Musculation & Progression</title>
+    <!-- Tailwind CSS pour un design moderne et fluide -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js pour les graphiques de progression -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FontAwesome pour les icônes -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between selection:bg-amber-500 selection:text-slate-950">
+
+    <!-- HEADER / STATUT RPG -->
+    <header class="bg-slate-900/80 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50 px-4 py-3">
+        <div class="max-w-md mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-yellow-300 flex items-center justify-center text-slate-950 font-black shadow-lg shadow-amber-500/20">
+                    <i class="fa-solid fa-crown"></i>
+                </div>
+                <div>
+                    <h1 id="user-title" class="text-sm font-bold tracking-wide text-amber-400">Novice de l'Acier</h1>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-xs text-slate-400">Niveau <span id="user-level" class="text-white font-bold">1</span></span>
+                        <div class="w-24 bg-slate-800 h-2 rounded-full overflow-hidden">
+                            <div id="xp-bar" class="bg-gradient-to-r from-amber-500 to-yellow-400 h-full w-0 transition-all duration-500"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button onclick="openQuestionnaire()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-2 rounded-xl transition font-medium border border-slate-700">
+                <i class="fa-solid fa-sliders mr-1 text-amber-400"></i> Profil
+            </button>
+        </div>
+    </header>
+
+    <!-- CONTENU PRINCIPAL -->
+    <main class="max-w-md w-full mx-auto p-4 flex-grow pb-24">
+
+        <!-- VUE 1 : QUESTIONNAIRE D'ENTRÉE -->
+        <section id="view-questionnaire" class="space-y-6">
+            <div class="text-center space-y-2 py-4">
+                <span class="text-xs font-bold uppercase tracking-widest text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20">Calibration Morphologique</span>
+                <h2 class="text-2xl font-black tracking-tight">Définissons Votre Programme</h2>
+                <p class="text-sm text-slate-400">Renseignez vos critères pour générer une séance sur-mesure et des fourchettes d'efforts physiologiques adaptées.</p>
+            </div>
+
+            <div class="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-5 space-y-4 backdrop-blur-sm">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Âge</label>
+                        <input type="number" id="q-age" value="35" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-amber-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Genre</label>
+                        <select id="q-gender" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-amber-500">
+                            <option value="femme">Femme</option>
+                            <option value="homme">Homme</option>
+                            <option value="autre">Autre</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Poids (kg)</label>
+                        <input type="number" id="q-weight" value="65" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-amber-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Taille (cm)</label>
+                        <input type="number" id="q-height" value="170" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-amber-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">Objectif Principal</label>
+                    <select id="q-goal" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-amber-500">
+                        <option value="masse">Prise de Masse / Hypertrophie (8-12 reps)</option>
+                        <option value="force">Force Pure / Puissance (5-8 reps)</option>
+                        <option value="seche">Sèche / Tonification (12-15 reps)</option>
+                        <option value="sante">Santé & Mobilité (10-15 reps)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">Zone à Travailler Aujourd'hui</label>
+                    <select id="q-zone" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-amber-500">
+                        <option value="haut">Haut du Corps (Pectoraux, Dos, Bras, Épaules)</option>
+                        <option value="bas">Bas du Corps (Jambes, Fessiers, Ischios)</option>
+                        <option value="full">Full Body (Corps entier)</option>
+                        <option value="abdos">Core & Sangle Abdominale</option>
+                    </select>
+                </div>
+
+                <button onclick="generateSession()" class="w-full bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-bold py-3.5 rounded-xl shadow-lg shadow-amber-500/20 hover:opacity-95 transition active:scale-[0.98]">
+                    Générer ma Séance & Démarrer <i class="fa-solid fa-arrow-right ml-1"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- VUE 2 : SÉANCE & SUIVI DES SÉRIES -->
+        <section id="view-workout" class="hidden space-y-4">
+            <div class="flex justify-between items-center bg-slate-900/60 border border-slate-800/80 p-4 rounded-2xl">
+                <div>
+                    <span id="session-badge" class="text-xs font-bold uppercase tracking-wider text-amber-400">Séance active</span>
+                    <h2 id="session-title-text" class="text-lg font-bold">Haut du Corps</h2>
+                </div>
+                <div class="text-right">
+                    <span class="text-xs text-slate-400 block">Reps cibles</span>
+                    <span id="target-reps-display" class="text-sm font-black text-amber-400">8 - 12 reps</span>
+                </div>
+            </div>
+
+            <!-- Liste des exercices générés -->
+            <div id="exercises-container" class="space-y-4">
+                <!-- Injecté dynamiquement par JS -->
+            </div>
+
+            <!-- Chronomètre de repos -->
+            <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-2xl flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center text-amber-400">
+                        <i class="fa-solid fa-stopwatch text-lg"></i>
+                    </div>
+                    <div>
+                        <span class="text-xs text-slate-400 block">Chronomètre de repos</span>
+                        <span id="timer-display" class="text-lg font-mono font-bold">01:30</span>
+                    </div>
+                </div>
+                <div class="space-x-2">
+                    <button onclick="startRestTimer(90)" class="bg-amber-500 text-slate-950 px-3.5 py-2 rounded-xl text-xs font-bold hover:bg-amber-400 transition">90s</button>
+                    <button onclick="resetTimer()" class="bg-slate-800 text-slate-300 px-3 py-2 rounded-xl text-xs font-medium hover:bg-slate-700 transition"><i class="fa-solid fa-rotate-right"></i></button>
+                </div>
+            </div>
+
+            <button onclick="finishWorkout()" class="w-full bg-emerald-500 text-slate-950 font-bold py-3.5 rounded-xl shadow-lg shadow-emerald-500/20 hover:opacity-95 transition">
+                Terminer la Séance & Enregistrer l'XP <i class="fa-solid fa-trophy ml-1"></i>
+            </button>
+        </section>
+
+        <!-- VUE 3 : TABLEAU DE BORD DE PROGRESSION & TROPHÉES -->
+        <section id="view-stats" class="hidden space-y-6">
+            <div class="text-center space-y-1">
+                <h2 class="text-xl font-black">Tableau de Bord & Progression</h2>
+                <p class="text-xs text-slate-400">Visualisez vos charges maximales et débloquez vos couronnes.</p>
+            </div>
+
+            <!-- Graphique Chart.js -->
+            <div class="bg-slate-900/60 border border-slate-800/80 p-4 rounded-2xl backdrop-blur-sm">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3"><i class="fa-solid fa-chart-line text-amber-400 mr-1"></i> Évolution des Charges Max (kg)</h3>
+                <div class="h-48 w-full">
+                    <canvas id="progressChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Trophées et Couronnes -->
+            <div class="bg-slate-900/60 border border-slate-800/80 p-4 rounded-2xl space-y-3 backdrop-blur-sm">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400"><i class="fa-solid fa-crown text-amber-400 mr-1"></i> Salle des Trophées</h3>
+                <div id="trophies-container" class="grid grid-cols-2 gap-2">
+                    <!-- Injecté par JS -->
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- BARRE DE NAVIGATION INFÉRIEURE -->
+    <nav class="bg-slate-900/90 backdrop-blur-md border-t border-slate-800 fixed bottom-0 left-0 right-0 z-50">
+        <div class="max-w-md mx-auto flex justify-around py-3">
+            <button onclick="switchTab('questionnaire')" id="nav-btn-questionnaire" class="flex flex-col items-center text-amber-400 transition">
+                <i class="fa-solid fa-dumbbell text-lg"></i>
+                <span class="text-[10px] font-medium mt-1">Séance</span>
+            </button>
+            <button onclick="switchTab('workout')" id="nav-btn-workout" class="flex flex-col items-center text-slate-400 hover:text-slate-200 transition">
+                <i class="fa-solid fa-clipboard-list text-lg"></i>
+                <span class="text-[10px] font-medium mt-1">Journal</span>
+            </button>
+            <button onclick="switchTab('stats')" id="nav-btn-stats" class="flex flex-col items-center text-slate-400 hover:text-slate-200 transition">
+                <i class="fa-solid fa-chart-pie text-lg"></i>
+                <span class="text-[10px] font-medium mt-1">Progrès</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- SCRIPT LOGIQUE APPLICATIVE -->
+    <script>
+        // État global de l'application
+        let appState = {
+            xp: 120,
+            level: 2,
+            targetReps: "8 - 12",
+            exercises: [],
+            history: [
+                { date: "Lun", maxWeight: 50 },
+                { date: "Mer", maxWeight: 55 },
+                { date: "Ven", maxWeight: 57.5 },
+                { date: "Auj.", maxWeight: 60 }
+            ],
+            trophies: [
+                { title: "Premier Pas", desc: "Terminer sa 1ère séance", unlocked: true },
+                { title: "Guerrier de l'Acier", desc: "Atteindre le niveau 2", unlocked: true },
+                { title: "Titan", desc: "Soulever plus de 100kg cumulés", unlocked: false },
+                { title: "Couronne Royale", desc: "Compléter 10 entraînements", unlocked: false }
+            ]
+        };
+
+        // Bases d'exercices par zone
+        const exerciseDatabase = {
+            haut: [
+                { name: "Développé Couché", sets: 4, reps: "8-12", weight: 50 },
+                { name: "Tractions / Tirage Vertical", sets: 4, reps: "8-12", weight: 45 },
+                { name: "Développé Militaire Épaules", sets: 3, reps: "10-12", weight: 30 },
+                { name: "Curl Biceps Haltères", sets: 3, reps: "12-15", weight: 12 }
+            ],
+            bas: [
+                { name: "Squat Barre", sets: 4, reps: "8-12", weight: 70 },
+                { name: "Soulevé de Terre Roumain", sets: 4, reps: "8-12", weight: 65 },
+                { name: "Presse à Cuisses", sets: 3, reps: "10-15", weight: 120 },
+                { name: "Extensions Mollets", sets: 3, reps: "15-20", weight: 40 }
+            ],
+            full: [
+                { name: "Burpees", sets: 3, reps: "10-12", weight: 0 },
+                { name: "épaulé-jeté / Clean & Jerk", sets: 4, reps: "6-8", weight: 40 },
+                { name: "Fendes Marchées", sets: 3, reps: "12 par jambe", weight: 16 }
+            ],
+            abdos: [
+                { name: "Crunchs au sol", sets: 3, reps: "15-20", weight: 0 },
+                { name: "Gainage Planche", sets: 3, reps: "45 secondes", weight: 0 },
+                { name: "Relevés de jambes suspendu", sets: 3, reps: "10-12", weight: 0 }
+            ]
+        };
+
+        // Initialisation
+        document.addEventListener("DOMContentLoaded", () => {
+            updateRPGUI();
+            renderTrophies();
+            initChart();
+        });
+
+        function switchTab(tab) {
+            document.getElementById('view-questionnaire').classList.add('hidden');
+            document.getElementById('view-workout').classList.add('hidden');
+            document.getElementById('view-stats').classList.add('hidden');
+
+            document.getElementById('nav-btn-questionnaire').className = "flex flex-col items-center text-slate-400 hover:text-slate-200 transition";
+            document.getElementById('nav-btn-workout').className = "flex flex-col items-center text-slate-400 hover:text-slate-200 transition";
+            document.getElementById('nav-btn-stats').className = "flex flex-col items-center text-slate-400 hover:text-slate-200 transition";
+
+            if(tab === 'questionnaire') {
+                document.getElementById('view-questionnaire').classList.remove('hidden');
+                document.getElementById('nav-btn-questionnaire').className = "flex flex-col items-center text-amber-400 transition";
+            } else if(tab === 'workout') {
+                document.getElementById('view-workout').classList.remove('hidden');
+                document.getElementById('nav-btn-workout').className = "flex flex-col items-center text-amber-400 transition";
+            } else if(tab === 'stats') {
+                document.getElementById('view-stats').classList.remove('hidden');
+                document.getElementById('nav-btn-stats').className = "flex flex-col items-center text-amber-400 transition";
+            }
+        }
+
+        function generateSession() {
+            const goal = document.getElementById('q-goal').value;
+            const zone = document.getElementById('q-zone').value;
+
+            // Ajustement des reps selon l'objectif
+            if(goal === 'force') appState.targetReps = "5 - 8";
+            else if(goal === 'masse') appState.targetReps = "8 - 12";
+            else appState.targetReps = "12 - 15";
+
+            document.getElementById('target-reps-display').innerText = appState.targetReps;
+            
+            // Sélection des exercices
+            appState.exercises = JSON.parse(JSON.stringify(exerciseDatabase[zone] || exerciseDatabase['haut']));
+            
+            renderExercises();
+            switchTab('workout');
+        }
+
+        function renderExercises() {
+            const container = document.getElementById('exercises-container');
+            container.innerHTML = "";
+
+            appState.exercises.forEach((ex, index) => {
+                let setsHtml = '';
+                for(let s = 1; s <= ex.sets; s++) {
+                    setsHtml += `
+                        <div class="flex items-center justify-between bg-slate-950 p-2.5 rounded-xl border border-slate-800/60 mb-2">
+                            <span class="text-xs font-bold text-slate-400">Série ${s}</span>
+                            <div class="flex items-center space-x-2">
+                                <input type="number" value="${ex.weight}" class="w-16 bg-slate-900 border border-slate-800 rounded-lg text-center py-1 text-sm font-bold text-amber-400">
+                                <span class="text-xs text-slate-500">kg</span>
+                                <input type="number" value="${ex.reps.replace(/[^0-9]/g, '') || 10}" class="w-14 bg-slate-900 border border-slate-800 rounded-lg text-center py-1 text-sm font-bold text-white">
+                                <span class="text-xs text-slate-500">reps</span>
+                                <button onclick="completeSet(this)" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-emerald-500 hover:text-slate-950 text-slate-300 flex items-center justify-center transition">
+                                    <i class="fa-solid fa-check text-xs"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                container.innerHTML += `
+                    <div class="bg-slate-900/60 border border-slate-800/80 p-4 rounded-2xl backdrop-blur-sm">
+                        <h3 class="font-bold text-sm text-white mb-2 flex items-center justify-between">
+                            <span><i class="fa-solid fa-bolt text-amber-400 mr-2"></i>${ex.name}</span>
+                            <span class="text-xs font-normal text-slate-400">${ex.sets} séries</span>
+                        </h3>
+                        <div class="space-y-1">
+                            ${setsHtml}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function completeSet(btn) {
+            btn.classList.toggle('bg-emerald-500');
+            btn.classList.toggle('text-slate-950');
+            btn.classList.toggle('bg-slate-800');
+            btn.classList.toggle('text-slate-300');
+            
+            // Gain d'XP instantané
+            appState.xp += 15;
+            checkLevelUp();
+            updateRPGUI();
+            startRestTimer(90);
+        }
+
+        function finishWorkout() {
+            appState.xp += 100;
+            checkLevelUp();
+            updateRPGUI();
+            alert("Séance validée avec succès ! +100 XP gagnés.");
+            switchTab('stats');
+        }
+
+        function checkLevelUp() {
+            let nextLevelXp = appState.level * 150;
+            if(appState.xp >= nextLevelXp) {
+                appState.level++;
+                appState.trophies[1].unlocked = true; // Débloque le trophée Guerrier
+                alert(`🎉 Niveau supérieur atteint ! Vous êtes maintenant niveau ${appState.level}.`);
+            }
+        }
+
+        function updateRPGUI() {
+            document.getElementById('user-level').innerText = appState.level;
+            let nextLevelXp = appState.level * 150;
+            let percent = Math.min(100, (appState.xp / nextLevelXp) * 100);
+            document.getElementById('xp-bar').style.width = percent + '%';
+            
+            if(appState.level >= 3) document.getElementById('user-title').innerText = "Gladiateur de l'Acier";
+            if(appState.level >= 5) document.getElementById('user-title').innerText = "Titan Légendaire";
+        }
+
+        function renderTrophies() {
+            const container = document.getElementById('trophies-container');
+            container.innerHTML = "";
+            appState.trophies.forEach(t => {
+                container.innerHTML += `
+                    <div class="p-3 rounded-xl border ${t.unlocked ? 'bg-amber-500/10 border-amber-500/30 text-amber-300' : 'bg-slate-950/50 border-slate-900 text-slate-600'} flex items-center space-x-3">
+                        <i class="fa-solid fa-crown text-lg ${t.unlocked ? 'text-amber-400' : 'text-slate-700'}"></i>
+                        <div>
+                            <h4 class="text-xs font-bold ${t.unlocked ? 'text-amber-400' : 'text-slate-500'}">${t.title}</h4>
+                            <p class="text-[10px] text-slate-400">${t.desc}</p>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('progressChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: appState.history.map(h => h.date),
+                    datasets: [{
+                        label: 'Charge Max (kg)',
+                        data: appState.history.map(h => h.maxWeight),
+                        borderColor: '#f59e0b',
+                        backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                        borderWidth: 3,
+                        tension: 0.3,
+                        fill: true,
+                        pointBackgroundColor: '#f59e0b'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8', font: { size: 10 } } },
+                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8', font: { size: 10 } } }
+                    }
+                }
+            });
+        }
+
+        // Chronomètre de repos
+        let timerInterval;
+        function startRestTimer(seconds) {
+            clearInterval(timerInterval);
+            let remaining = seconds;
+            const display = document.getElementById('timer-display');
+            
+            timerInterval = setInterval(() => {
+                let m = Math.floor(remaining / 60);
+                let s = remaining % 60;
+                display.innerText = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+                if(remaining <= 0) {
+                    clearInterval(timerInterval);
+                    display.innerText = "00:00";
+                }
+                remaining--;
+            }, 1000);
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            document.getElementById('timer-display').innerText = "01:30";
+        }
+
+        function openQuestionnaire() {
+            switchTab('questionnaire');
+        }
+    </script>
+</body>
+</html>
