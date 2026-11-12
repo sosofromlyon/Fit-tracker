@@ -18,7 +18,7 @@
 <body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between selection:bg-orange-200 selection:text-slate-900">
 
     <!-- HEADER / STATUT RPG -->
-    <header class="bg-slate-800/80 backdrop-blur-md border-b border-sky-900/40 sticky top-0 z-50 px-4 py-3">
+    <header class="bg-slate-800/80 backdrop-blur-md border-b border-sky-900/40 sticky top-0 z-40 px-4 py-3">
         <div class="max-w-md mx-auto flex justify-between items-center">
             <div class="flex items-center space-x-3">
                 <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-orange-300 to-sky-200 flex items-center justify-center text-slate-900 font-black shadow-lg shadow-orange-300/20">
@@ -40,6 +40,21 @@
         </div>
     </header>
 
+    <!-- POP-UP EXPLICATIVE (MODAL) -->
+    <div id="info-modal" onclick="closeModal()" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 transition-opacity">
+        <div class="bg-slate-800 border border-sky-800/60 rounded-2xl max-w-sm w-full p-5 shadow-2xl space-y-3 relative">
+            <div class="flex items-center justify-between border-b border-sky-900/40 pb-2">
+                <h3 id="modal-title" class="font-bold text-orange-300 text-base flex items-center">
+                    <i class="fa-solid fa-circle-info mr-2"></i> Nom de l'exercice
+                </h3>
+                <span class="text-[10px] uppercase tracking-wider text-sky-200/50 bg-slate-900 px-2 py-0.5 rounded-md">Fermer</span>
+            </div>
+            <p id="modal-desc" class="text-sm text-sky-100/90 leading-relaxed">
+                Description synthétique de l'exercice.
+            </p>
+        </div>
+    </div>
+
     <!-- CONTENU PRINCIPAL -->
     <main class="max-w-md w-full mx-auto p-4 flex-grow pb-24">
 
@@ -55,7 +70,7 @@
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block text-xs font-semibold text-sky-200/80 mb-1">Âge</label>
-                        <input type="number" id="q-age" value="35" class="w-full bg-slate-900 border border-sky-900/40 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-orange-300">
+                        <input type="number" id="q-age" value="40" class="w-full bg-slate-900 border border-sky-900/40 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-orange-300">
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-sky-200/80 mb-1">Genre</label>
@@ -70,11 +85,11 @@
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block text-xs font-semibold text-sky-200/80 mb-1">Poids (kg)</label>
-                        <input type="number" id="q-weight" value="65" class="w-full bg-slate-900 border border-sky-900/40 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-orange-300">
+                        <input type="number" id="q-weight" value="60" class="w-full bg-slate-900 border border-sky-900/40 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-orange-300">
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-sky-200/80 mb-1">Taille (cm)</label>
-                        <input type="number" id="q-height" value="170" class="w-full bg-slate-900 border border-sky-900/40 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-orange-300">
+                        <input type="number" id="q-height" value="168" class="w-full bg-slate-900 border border-sky-900/40 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-orange-300">
                     </div>
                 </div>
 
@@ -116,7 +131,7 @@
             <div class="bg-slate-800/60 border border-sky-900/40 p-4 rounded-2xl flex justify-between items-center shadow-md">
                 <div>
                     <h2 id="session-title-text" class="text-lg font-bold text-white">Corps Entier (Full Body)</h2>
-                    <span class="text-xs text-sky-200/70">Programme personnalisé</span>
+                    <span class="text-[11px] text-sky-200/70">Cliquez sur un exercice pour voir sa fiche</span>
                 </div>
                 <div class="text-right">
                     <span class="text-xs text-sky-200/70 block">Fourchette cible</span>
@@ -127,6 +142,30 @@
             <!-- Liste des exercices -->
             <div id="exercises-container" class="space-y-4">
                 <!-- Injecté par JS -->
+            </div>
+
+            <!-- Formulaire d'ajout d'exercice -->
+            <div class="bg-slate-800/40 border border-dashed border-sky-700/50 p-4 rounded-2xl space-y-3">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-sky-200 flex items-center">
+                    <i class="fa-solid fa-plus-circle text-orange-300 mr-1.5"></i> Ajouter un exercice à la séance
+                </h3>
+                <div class="space-y-2">
+                    <input type="text" id="new-ex-name" placeholder="Nom (ex: Tractions strictes, Dips...)" class="w-full bg-slate-900 border border-sky-900/40 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-300">
+                    <div class="grid grid-cols-2 gap-2">
+                        <div class="flex items-center bg-slate-900 border border-sky-900/40 rounded-xl px-3 py-1.5">
+                            <span class="text-[11px] text-sky-200/60 mr-2">Séries :</span>
+                            <input type="number" id="new-ex-sets" value="3" min="1" max="10" class="w-full bg-transparent text-xs font-bold text-white focus:outline-none">
+                        </div>
+                        <div class="flex items-center bg-slate-900 border border-sky-900/40 rounded-xl px-3 py-1.5">
+                            <span class="text-[11px] text-sky-200/60 mr-2">Charge (kg) :</span>
+                            <input type="number" id="new-ex-weight" value="0" min="0" class="w-full bg-transparent text-xs font-bold text-orange-300 focus:outline-none">
+                        </div>
+                    </div>
+                    <input type="text" id="new-ex-desc" placeholder="Note rapide / muscles ciblés (optionnel)" class="w-full bg-slate-900 border border-sky-900/40 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-300">
+                    <button onclick="addCustomExercise()" class="w-full bg-sky-950/80 hover:bg-sky-900 text-sky-200 border border-sky-800/60 font-semibold py-2 rounded-xl text-xs transition">
+                        + Ajouter à ma liste
+                    </button>
+                </div>
             </div>
 
             <!-- Chronomètre de repos -->
@@ -180,7 +219,7 @@
     </main>
 
     <!-- BARRE DE NAVIGATION INFÉRIEURE -->
-    <nav class="bg-slate-800/90 backdrop-blur-md border-t border-sky-900/40 fixed bottom-0 left-0 right-0 z-50">
+    <nav class="bg-slate-800/90 backdrop-blur-md border-t border-sky-900/40 fixed bottom-0 left-0 right-0 z-40">
         <div class="max-w-md mx-auto flex justify-around py-3">
             <button onclick="switchTab('questionnaire')" id="nav-btn-questionnaire" class="flex flex-col items-center text-orange-300 transition">
                 <i class="fa-solid fa-dumbbell text-lg"></i>
@@ -226,27 +265,27 @@
 
         const exerciseDatabase = {
             full: [
-                { name: "Squat & Press (Poids léger / Haltères)", sets: 3, reps: "8-12", weight: 4 },
-                { name: "Pompes sur genoux ou inclinées", sets: 3, reps: "8-12", weight: 0 },
-                { name: "Fentes alternées", sets: 3, reps: "10-12", weight: 4 },
-                { name: "Gainage dynamique", sets: 3, reps: "30-45 sec", weight: 0 }
+                { name: "Squat & Press", sets: 3, reps: "8-12", weight: 4, desc: "Mouvement complet : descendez en squat puis poussez les poids au-dessus de la tête en remontant. Sollicite jambes, fessiers et épaules." },
+                { name: "Pompes (Inclinées ou Sol)", sets: 3, reps: "8-12", weight: 0, desc: "Gainage actif, fléchissez les bras jusqu'à frôler le sol avec la poitrine puis repoussez. Cible pectoraux, triceps et deltoïdes." },
+                { name: "Fentes alternées", sets: 3, reps: "10-12", weight: 4, desc: "Un grand pas en avant, fléchissez le genou arrière vers le sol en gardant le buste droit. Travaille quadriceps et fessiers." },
+                { name: "Gainage dynamique", sets: 3, reps: "30-45 sec", weight: 0, desc: "En appui sur les avant-bras, alignez tête-bassin-talons en contractant fort les abdominaux et les fessiers." }
             ],
             haut: [
-                { name: "Développé Couché (Haltères légers)", sets: 3, reps: "8-12", weight: 6 },
-                { name: "Tirage Vertical / Élastique", sets: 3, reps: "8-12", weight: 10 },
-                { name: "Développé Épaules Assis", sets: 3, reps: "10-12", weight: 4 },
-                { name: "Curl Biceps Soft", sets: 3, reps: "12-15", weight: 4 }
+                { name: "Développé Couché Haltères", sets: 3, reps: "8-12", weight: 6, desc: "Allongé sur le dos, poussez les haltères verticalement au-dessus de la poitrine. Cible les pectoraux et l'avant des épaules." },
+                { name: "Tirage Vertical / Élastique", sets: 3, reps: "8-12", weight: 10, desc: "Tirez la charge ou l'élastique vers le haut de la poitrine en resserrant les omoplates. Renforce le grand dorsal et les biceps." },
+                { name: "Développé Épaules Assis", sets: 3, reps: "10-12", weight: 4, desc: "Dos bien droit, poussez les haltères depuis les épaules vers le plafond sans cambrer le bas du dos. Cible les deltoïdes." },
+                { name: "Curl Biceps", sets: 3, reps: "12-15", weight: 4, desc: "Coudes collés au buste, fléchissez les avant-bras pour monter les haltères. Isolation directe des biceps." }
             ],
             bas: [
-                { name: "Squat au poids de corps", sets: 3, reps: "10-15", weight: 0 },
-                { name: "Fentes Statiques", sets: 3, reps: "10-12", weight: 4 },
-                { name: "Pont fessier (Glute Bridge)", sets: 3, reps: "12-15", weight: 0 },
-                { name: "Extensions Mollets", sets: 3, reps: "15-20", weight: 0 }
+                { name: "Squat au poids de corps", sets: 3, reps: "10-15", weight: 0, desc: "Pieds largeur d'épaules, poussez les fesses en arrière et descendez comme pour vous asseoir. Fondamental pour les cuisses et fessiers." },
+                { name: "Fentes Statiques", sets: 3, reps: "10-12", weight: 4, desc: "Pieds décalés avant/arrière, fléchissez verticalement les deux genoux à 90°. Idéal pour l'équilibre et le galbe des fessiers." },
+                { name: "Pont fessier (Glute Bridge)", sets: 3, reps: "12-15", weight: 0, desc: "Allongé sur le dos, genoux fléchis, poussez sur les talons pour décoller le bassin au maximum. Cible fessiers et ischio-jambiers." },
+                { name: "Extensions Mollets", sets: 3, reps: "15-20", weight: 0, desc: "Debout, montez sur la pointe des pieds en marquant une pause en haut avant de redescendre lentement." }
             ],
             abdos: [
-                { name: "Crunchs contrôlés", sets: 3, reps: "15-20", weight: 0 },
-                { name: "Gainage Planche", sets: 3, reps: "30-45 sec", weight: 0 },
-                { name: "Relevés de bassins", sets: 3, reps: "12-15", weight: 0 }
+                { name: "Crunchs contrôlés", sets: 3, reps: "15-20", weight: 0, desc: "Allongé sur le dos, enroulez doucement le haut du buste en expirant sans tirer sur la nuque. Cible le grand droit." },
+                { name: "Gainage Planche", sets: 3, reps: "30-45 sec", weight: 0, desc: "Maintien statique en appui sur les avant-bras. Renforce la sangle abdominale profonde (transverse) et protège les lombaires." },
+                { name: "Relevés de bassins", sets: 3, reps: "12-15", weight: 0, desc: "Allongé sur le dos, décollez légèrement le bas du dos en poussant les pieds vers le plafond. Cible le bas des abdominaux." }
             ]
         };
 
@@ -283,10 +322,8 @@
             const goal = document.getElementById('q-goal').value;
             const zone = document.getElementById('q-zone').value;
 
-            // Titre dynamique de la bannière
             document.getElementById('session-title-text').innerText = zoneLabels[zone] || "Séance Personnalisée";
 
-            // Définition propre des reps
             if(goal === 'force') {
                 appState.targetReps = "5 - 8";
                 appState.targetRepsMin = 5;
@@ -299,8 +336,6 @@
             }
 
             document.getElementById('target-reps-display').innerText = appState.targetReps;
-            
-            // Copie dynamique selon la zone sélectionnée
             appState.exercises = JSON.parse(JSON.stringify(exerciseDatabase[zone] || exerciseDatabase['full']));
             
             renderExercises();
@@ -311,7 +346,12 @@
             const container = document.getElementById('exercises-container');
             container.innerHTML = "";
 
-            appState.exercises.forEach((ex) => {
+            if (appState.exercises.length === 0) {
+                container.innerHTML = `<div class="text-center p-6 bg-slate-800/30 rounded-2xl border border-sky-900/20 text-xs text-sky-200/60">Aucun exercice sélectionné. Ajoutez-en un ci-dessous !</div>`;
+                return;
+            }
+
+            appState.exercises.forEach((ex, index) => {
                 let setsHtml = '';
                 for(let s = 1; s <= ex.sets; s++) {
                     setsHtml += `
@@ -332,16 +372,74 @@
 
                 container.innerHTML += `
                     <div class="bg-slate-800/50 border border-sky-900/30 p-4 rounded-2xl backdrop-blur-sm shadow-md">
-                        <h3 class="font-bold text-sm text-white mb-2 flex items-center justify-between">
-                            <span><i class="fa-solid fa-bolt text-orange-300 mr-2"></i>${ex.name}</span>
-                            <span class="text-xs font-normal text-sky-200/60">${ex.sets} séries</span>
-                        </h3>
+                        <div class="flex items-center justify-between mb-3">
+                            <button onclick="openExerciseInfo(${index})" class="text-left font-bold text-sm text-white hover:text-orange-300 transition flex items-center group">
+                                <i class="fa-solid fa-bolt text-orange-300 mr-2"></i>
+                                <span class="underline decoration-sky-700/60 underline-offset-4 group-hover:decoration-orange-300">${ex.name}</span>
+                                <i class="fa-solid fa-circle-info text-xs text-sky-300/60 ml-2 group-hover:text-orange-300"></i>
+                            </button>
+                            <div class="flex items-center space-x-3">
+                                <span class="text-xs font-normal text-sky-200/60">${ex.sets} séries</span>
+                                <button onclick="removeExercise(${index})" title="Supprimer cet exercice" class="text-sky-200/40 hover:text-rose-400 transition p-1">
+                                    <i class="fa-solid fa-trash-can text-xs"></i>
+                                </button>
+                            </div>
+                        </div>
                         <div class="space-y-1">
                             ${setsHtml}
                         </div>
                     </div>
                 `;
             });
+        }
+
+        // Gestion de la modale d'information
+        function openExerciseInfo(index) {
+            const ex = appState.exercises[index];
+            if (!ex) return;
+            document.getElementById('modal-title').innerHTML = `<i class="fa-solid fa-circle-info mr-2"></i> ${ex.name}`;
+            document.getElementById('modal-desc').innerText = ex.desc || "Mouvement personnalisé. Concentrez-vous sur une exécution propre, contrôlée et une respiration régulière.";
+            document.getElementById('info-modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('info-modal').classList.add('hidden');
+        }
+
+        // Ajout / Suppression d'exercices
+        function addCustomExercise() {
+            const nameInput = document.getElementById('new-ex-name');
+            const setsInput = document.getElementById('new-ex-sets');
+            const weightInput = document.getElementById('new-ex-weight');
+            const descInput = document.getElementById('new-ex-desc');
+
+            const name = nameInput.value.trim();
+            if (!name) {
+                alert("Indiquez au moins le nom de l'exercice.");
+                return;
+            }
+
+            const sets = parseInt(setsInput.value) || 3;
+            const weight = parseFloat(weightInput.value) || 0;
+            const desc = descInput.value.trim() || "Exercice ajouté manuellement à votre séance.";
+
+            appState.exercises.push({
+                name: name,
+                sets: sets,
+                reps: appState.targetReps,
+                weight: weight,
+                desc: desc
+            });
+
+            // Réinitialisation des champs
+            nameInput.value = "";
+            descInput.value = "";
+            renderExercises();
+        }
+
+        function removeExercise(index) {
+            appState.exercises.splice(index, 1);
+            renderExercises();
         }
 
         function completeSet(btn) {
