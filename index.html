@@ -42,12 +42,12 @@
 
     <!-- POP-UP EXPLICATIVE (MODAL) -->
     <div id="info-modal" onclick="closeModal()" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 transition-opacity">
-        <div class="bg-slate-800 border border-sky-800/60 rounded-2xl max-w-sm w-full p-5 shadow-2xl space-y-3 relative">
+        <div class="bg-slate-800 border border-sky-800/60 rounded-2xl max-w-sm w-full p-5 shadow-2xl space-y-3 relative" onclick="event.stopPropagation()">
             <div class="flex items-center justify-between border-b border-sky-900/40 pb-2">
                 <h3 id="modal-title" class="font-bold text-orange-300 text-base flex items-center">
                     <i class="fa-solid fa-circle-info mr-2"></i> Nom de l'exercice
                 </h3>
-                <span class="text-[10px] uppercase tracking-wider text-sky-200/50 bg-slate-900 px-2 py-0.5 rounded-md">Fermer</span>
+                <button onclick="closeModal()" class="text-xs uppercase tracking-wider text-sky-200/50 hover:text-white bg-slate-900 px-2 py-1 rounded-md">Fermer</button>
             </div>
             <p id="modal-desc" class="text-sm text-sky-100/90 leading-relaxed">
                 Description synthétique de l'exercice.
@@ -144,13 +144,31 @@
                 <!-- Injecté par JS -->
             </div>
 
-            <!-- Formulaire d'ajout d'exercice -->
+            <!-- Ajout d'exercice : Base existante (Menu déroulant) OU Saisie manuelle -->
             <div class="bg-slate-800/40 border border-dashed border-sky-700/50 p-4 rounded-2xl space-y-3">
                 <h3 class="text-xs font-bold uppercase tracking-wider text-sky-200 flex items-center">
                     <i class="fa-solid fa-plus-circle text-orange-300 mr-1.5"></i> Ajouter un exercice à la séance
                 </h3>
-                <div class="space-y-2">
-                    <input type="text" id="new-ex-name" placeholder="Nom (ex: Tractions strictes, Dips...)" class="w-full bg-slate-900 border border-sky-900/40 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-300">
+                
+                <!-- Onglets de choix -->
+                <div class="grid grid-cols-2 gap-1 bg-slate-900 p-1 rounded-xl border border-sky-900/40">
+                    <button onclick="switchAddMode('catalog')" id="tab-catalog" class="py-1.5 text-xs font-bold rounded-lg bg-sky-950 text-orange-300 transition">Depuis la base</button>
+                    <button onclick="switchAddMode('custom')" id="tab-custom" class="py-1.5 text-xs font-bold rounded-lg text-sky-200/60 transition">Saisie libre</button>
+                </div>
+
+                <!-- Mode A : Sélection depuis la base (Menu déroulant) -->
+                <div id="add-mode-catalog" class="space-y-2">
+                    <select id="catalog-select" class="w-full bg-slate-900 border border-sky-900/40 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-300">
+                        <!-- Rempli dynamiquement -->
+                    </select>
+                    <button onclick="addExerciseFromCatalog()" class="w-full bg-orange-300 text-slate-950 font-bold py-2 rounded-xl text-xs hover:bg-orange-200 transition">
+                        + Ajouter cet exercice de la base
+                    </button>
+                </div>
+
+                <!-- Mode B : Saisie manuelle -->
+                <div id="add-mode-custom" class="hidden space-y-2">
+                    <input type="text" id="new-ex-name" placeholder="Nom de l'exercice..." class="w-full bg-slate-900 border border-sky-900/40 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-300">
                     <div class="grid grid-cols-2 gap-2">
                         <div class="flex items-center bg-slate-900 border border-sky-900/40 rounded-xl px-3 py-1.5">
                             <span class="text-[11px] text-sky-200/60 mr-2">Séries :</span>
@@ -161,9 +179,9 @@
                             <input type="number" id="new-ex-weight" value="0" min="0" class="w-full bg-transparent text-xs font-bold text-orange-300 focus:outline-none">
                         </div>
                     </div>
-                    <input type="text" id="new-ex-desc" placeholder="Note rapide / muscles ciblés (optionnel)" class="w-full bg-slate-900 border border-sky-900/40 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-300">
-                    <button onclick="addCustomExercise()" class="w-full bg-sky-950/80 hover:bg-sky-900 text-sky-200 border border-sky-800/60 font-semibold py-2 rounded-xl text-xs transition">
-                        + Ajouter à ma liste
+                    <input type="text" id="new-ex-desc" placeholder="Description / muscles ciblés..." class="w-full bg-slate-900 border border-sky-900/40 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-300">
+                    <button onclick="addCustomExercise()" class="w-full bg-sky-950 hover:bg-sky-900 text-sky-200 border border-sky-800/60 font-semibold py-2 rounded-xl text-xs transition">
+                        + Créer et ajouter l'exercice
                     </button>
                 </div>
             </div>
@@ -239,16 +257,16 @@
     <!-- SCRIPT LOGIQUE APPLICATIVE -->
     <script>
         let appState = {
-            xp: 120,
-            level: 2,
+            xp: parseInt(localStorage.getItem('fit_xp')) || 120,
+            level: parseInt(localStorage.getItem('fit_level')) || 2,
             targetReps: "8 - 12",
             targetRepsMin: 8,
             exercises: [],
-            history: [
+            history: JSON.parse(localStorage.getItem('fit_history')) || [
                 { date: "Séance 1", maxWeight: 5 },
                 { date: "Séance 2", maxWeight: 6 }
             ],
-            trophies: [
+            trophies: JSON.parse(localStorage.getItem('fit_trophies')) || [
                 { title: "Premier Pas", desc: "Terminer sa 1ère séance", unlocked: true },
                 { title: "Guerrier de l'Acier", desc: "Atteindre le niveau 2", unlocked: true },
                 { title: "Titan", desc: "Soulever plus de 100kg cumulés", unlocked: false },
@@ -294,6 +312,7 @@
         document.addEventListener("DOMContentLoaded", () => {
             updateRPGUI();
             renderTrophies();
+            populateCatalogSelect();
             initChart();
         });
 
@@ -315,6 +334,38 @@
             } else if(tab === 'stats') {
                 document.getElementById('view-stats').classList.remove('hidden');
                 document.getElementById('nav-btn-stats').className = "flex flex-col items-center text-orange-300 transition";
+            }
+        }
+
+        function populateCatalogSelect() {
+            const select = document.getElementById('catalog-select');
+            select.innerHTML = "";
+            for (let zone in exerciseDatabase) {
+                exerciseDatabase[zone].forEach(ex => {
+                    let opt = document.createElement('option');
+                    opt.value = JSON.stringify(ex);
+                    opt.textContent = `${ex.name} (${zoneLabels[zone]})`;
+                    select.appendChild(opt);
+                });
+            }
+        }
+
+        function switchAddMode(mode) {
+            const catalogDiv = document.getElementById('add-mode-catalog');
+            const customDiv = document.getElementById('add-mode-custom');
+            const tabCatalog = document.getElementById('tab-catalog');
+            const tabCustom = document.getElementById('tab-custom');
+
+            if(mode === 'catalog') {
+                catalogDiv.classList.remove('hidden');
+                customDiv.classList.add('hidden');
+                tabCatalog.className = "py-1.5 text-xs font-bold rounded-lg bg-sky-950 text-orange-300 transition";
+                tabCustom.className = "py-1.5 text-xs font-bold rounded-lg text-sky-200/60 transition";
+            } else {
+                catalogDiv.classList.add('hidden');
+                customDiv.classList.remove('hidden');
+                tabCustom.className = "py-1.5 text-xs font-bold rounded-lg bg-sky-950 text-orange-300 transition";
+                tabCatalog.className = "py-1.5 text-xs font-bold rounded-lg text-sky-200/60 transition";
             }
         }
 
@@ -380,7 +431,7 @@
                             </button>
                             <div class="flex items-center space-x-3">
                                 <span class="text-xs font-normal text-sky-200/60">${ex.sets} séries</span>
-                                <button onclick="removeExercise(${index})" title="Supprimer cet exercice" class="text-sky-200/40 hover:text-rose-400 transition p-1">
+                                <button onclick="removeExercise(${index})" title="Supprimer" class="text-sky-200/40 hover:text-rose-400 transition p-1">
                                     <i class="fa-solid fa-trash-can text-xs"></i>
                                 </button>
                             </div>
@@ -393,12 +444,11 @@
             });
         }
 
-        // Gestion de la modale d'information
         function openExerciseInfo(index) {
             const ex = appState.exercises[index];
             if (!ex) return;
             document.getElementById('modal-title').innerHTML = `<i class="fa-solid fa-circle-info mr-2"></i> ${ex.name}`;
-            document.getElementById('modal-desc').innerText = ex.desc || "Mouvement personnalisé. Concentrez-vous sur une exécution propre, contrôlée et une respiration régulière.";
+            document.getElementById('modal-desc').innerText = ex.desc || "Mouvement personnalisé. Exécution contrôlée.";
             document.getElementById('info-modal').classList.remove('hidden');
         }
 
@@ -406,7 +456,14 @@
             document.getElementById('info-modal').classList.add('hidden');
         }
 
-        // Ajout / Suppression d'exercices
+        function addExerciseFromCatalog() {
+            const select = document.getElementById('catalog-select');
+            if(!select.value) return;
+            const exData = JSON.parse(select.value);
+            appState.exercises.push(JSON.parse(JSON.stringify(exData)));
+            renderExercises();
+        }
+
         function addCustomExercise() {
             const nameInput = document.getElementById('new-ex-name');
             const setsInput = document.getElementById('new-ex-sets');
@@ -419,19 +476,14 @@
                 return;
             }
 
-            const sets = parseInt(setsInput.value) || 3;
-            const weight = parseFloat(weightInput.value) || 0;
-            const desc = descInput.value.trim() || "Exercice ajouté manuellement à votre séance.";
-
             appState.exercises.push({
                 name: name,
-                sets: sets,
+                sets: parseInt(setsInput.value) || 3,
                 reps: appState.targetReps,
-                weight: weight,
-                desc: desc
+                weight: parseFloat(weightInput.value) || 0,
+                desc: descInput.value.trim() || "Exercice personnalisé."
             });
 
-            // Réinitialisation des champs
             nameInput.value = "";
             descInput.value = "";
             renderExercises();
@@ -456,10 +508,32 @@
 
         function finishWorkout() {
             appState.xp += 100;
+            
+            // Enregistrement dans l'historique permanent
+            let maxW = 0;
+            appState.exercises.forEach(ex => {
+                if(ex.weight > maxW) maxW = ex.weight;
+            });
+
+            appState.history.push({
+                date: `Séance ${appState.history.length + 1}`,
+                maxWeight: maxW > 0 ? maxW : 5
+            });
+
+            saveToLocalStorage();
             checkLevelUp();
             updateRPGUI();
-            alert("Séance validée avec succès ! +100 XP gagnés.");
+            initChart();
+
+            alert("Séance validée et enregistrée dans l'historique ! +100 XP.");
             switchTab('stats');
+        }
+
+        function saveToLocalStorage() {
+            localStorage.setItem('fit_xp', appState.xp);
+            localStorage.setItem('fit_level', appState.level);
+            localStorage.setItem('fit_history', JSON.stringify(appState.history));
+            localStorage.setItem('fit_trophies', JSON.stringify(appState.trophies));
         }
 
         function checkLevelUp() {
@@ -467,7 +541,7 @@
             if(appState.xp >= nextLevelXp) {
                 appState.level++;
                 appState.trophies[1].unlocked = true;
-                alert(`🎉 Niveau supérieur atteint ! Vous êtes maintenant niveau ${appState.level}.`);
+                alert(`🎉 Niveau supérieur atteint ! Vous êtes niveau ${appState.level}.`);
             }
         }
 
@@ -499,6 +573,8 @@
 
         function initChart() {
             const ctx = document.getElementById('progressChart').getContext('2d');
+            if(progressChartInstance) progressChartInstance.destroy();
+
             progressChartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
